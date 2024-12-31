@@ -1,7 +1,5 @@
 FROM mysql:latest
 ENV MYSQL_ROOT_PASSWORD=password
 ENV MYSQL_DATABASE=Movies
-ENV MYSQL_USER=root
-ENV MYSQL_PASSWORD=password
 
 COPY db/dump.sql /docker-entrypoint-initdb.d/

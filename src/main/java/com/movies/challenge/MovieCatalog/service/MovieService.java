@@ -3,6 +3,7 @@ package com.movies.challenge.MovieCatalog.service;
 import com.movies.challenge.MovieCatalog.model.Movie;
 import com.movies.challenge.MovieCatalog.repository.IMovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,7 @@ public class MovieService implements  IMovieService<Movie, Integer>{
 
     }
 
+    @Cacheable("movies")
     @Override
     public Page<Movie> findAll(String search, String category, Year year, int page, int size, String sortBy, String direction) {
         Sort sortDirection = "desc".equalsIgnoreCase(direction)
