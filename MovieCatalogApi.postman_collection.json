@@ -1,0 +1,436 @@
+{
+	"info": {
+		"_postman_id": "21f82595-f89a-478d-beef-7ee25c3d040e",
+		"name": "MovieCatalogApi",
+		"description": "This collection contains the endpoints requested in the Movies, User, and Rate challenge.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3700253"
+	},
+	"item": [
+		{
+			"name": "Movies",
+			"item": [
+				{
+					"name": "List movies",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbjFAZXhhbXBsZS5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3MzU2Mjk5OTksImV4cCI6MTczNTY2NTk5OX0.dXIA1JFzXQybQJtqPCICViczL8eyTjDl8C5C7qnt5MdF8lho8Z-LjrXMFZfS9crx86iFkHwV4nDEFZ25lcvF-Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/movies?category=Action&page=0&size=3&sortBy=name&direction=asc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"movies"
+							],
+							"query": [
+								{
+									"key": "category",
+									"value": "Action"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "3"
+								},
+								{
+									"key": "sortBy",
+									"value": "name"
+								},
+								{
+									"key": "direction",
+									"value": "asc"
+								}
+							]
+						},
+						"description": "**List Movies** returns a list of movies with the following search and sorting parameters:\n\n- **Searchable**: By name or synopsis content.\n    \n- **Filterable**: By category and year of release.\n    \n- **Paginated**: You can specify how many movies you want per page.\n    \n- **Orderable**: By year, name, created date, or rating.\n    \n\nThis endpoint can be accessed by users with either the **admin** or **user** role."
+					},
+					"response": []
+				},
+				{
+					"name": "Create movies",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Matrix 2\",\n  \"releaseYear\": 2003,\n  \"synopsis\": \"Neo leads the revolution alongside Morpheus and Trinity. The trio of hackers races against the clock to save what's left of humanity from the machine army.\",\n  \"posterImage\": \"\", \n  \"category\": {\n    \"categoryId\": 1\n  },\n  \"user\": {\n    \"userId\": 1\n  }\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/movies/addMovies",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"movies",
+								"addMovies"
+							]
+						},
+						"description": "**Create Movies** allows authenticated and authorized users with the **admin** role to create a new movie. This endpoint returns a **201 (Created)** status when the movie is successfully created."
+					},
+					"response": []
+				},
+				{
+					"name": "Update movies",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful PUT request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{  \"movieId\": 8,\n\t \"category\": {\n        \"categoryId\": 4,\n        \"name\": \"Action\",\n        \"createdDate\": null\n     },\n    \"user\": {\n            \"userId\": 1,\n            \"username\": \"JohnDoe\",\n            \"email\": \"john@example.com\",\n            \"passwordHash\": \"hashedpassword1\",\n            \"role\": \"ADMIN\",\n            \"createdDate\": null\n        }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/movies/updateMovies",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"movies",
+								"updateMovies"
+							]
+						},
+						"description": "Update Movies allows authenticated and authorized users with the admin role to update a movie's details. This action can only be performed by users with the admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete movies",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful DELETE request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 202, 204]);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/movies/deleteMovies/10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"movies",
+								"deleteMovies",
+								"10"
+							]
+						},
+						"description": "Delete Movies allows authenticated and authorized users with the admin role to delete movies by providing the movie ID. This action can only be performed by users with the admin role."
+					},
+					"response": []
+				}
+			],
+			"description": "Movies contains the CRUD operations that users with the admin role can perform, as well as the movie listing."
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Login user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\":\"admin1@example.com\",\r\n    \"password\": \"admin123\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Allows the authentication of an existing user, returning a token."
+					},
+					"response": []
+				},
+				{
+					"name": "Register user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"admin_test1\",\r\n  \"email\": \"admin1@example.com\",\r\n  \"password\": \"admin123\",\r\n  \"role\": \"ADMIN\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Allows the creation of a new user with either an admin or user role."
+					},
+					"response": []
+				}
+			],
+			"description": "The User folder contains the endpoints for creating and authenticating users within the MovieCatalog API."
+		},
+		{
+			"name": "Rate",
+			"item": [
+				{
+					"name": "Rate movie",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTczNTI3NzYwMCwiZXhwIjoxNzM1MzEzNjAwfQ.MotTjFT11LK52zuB1oQRsV08Bg797jXmSi1xdGULwAIOz6bX3m_Ce_3m93ReR_NoO-zL_UbhQEto0955-mfIEg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/ratings/2?ratingValue=5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"ratings",
+								"2"
+							],
+							"query": [
+								{
+									"key": "ratingValue",
+									"value": "5"
+								}
+							]
+						},
+						"description": "Allows a movie to be rated by providing its ID and the assigned rating."
+					},
+					"response": []
+				},
+				{
+					"name": "List rated movies",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTczNTI3NzYwMCwiZXhwIjoxNzM1MzEzNjAwfQ.MotTjFT11LK52zuB1oQRsV08Bg797jXmSi1xdGULwAIOz6bX3m_Ce_3m93ReR_NoO-zL_UbhQEto0955-mfIEg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/ratings",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"ratings"
+							]
+						},
+						"description": "Returns a list of movies along with their ratings provided by the logged-in user."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete rated movie",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTczNTI3NzYwMCwiZXhwIjoxNzM1MzEzNjAwfQ.MotTjFT11LK52zuB1oQRsV08Bg797jXmSi1xdGULwAIOz6bX3m_Ce_3m93ReR_NoO-zL_UbhQEto0955-mfIEg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/ratings/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"ratings",
+								"1"
+							]
+						},
+						"description": "Allows the removal of a movie rating by an authenticated user using the movie id"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "id",
+			"value": "1"
+		},
+		{
+			"key": "base_url",
+			"value": "https://postman-rest-api-learner.glitch.me/"
+		}
+	]
+}
