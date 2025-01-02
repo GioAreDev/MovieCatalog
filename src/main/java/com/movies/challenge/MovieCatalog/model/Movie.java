@@ -34,6 +34,13 @@ public class Movie {
     @Column(name = "created_date", updatable = false, insertable = false)
     private LocalDateTime createdDate;
 
+    public Movie(int i, String inception, String s, Year of, String updated_synopsis) {
+    }
+
+    public Movie() {
+        
+    }
+
     public Integer getMovieId() {
         return movieId;
     }

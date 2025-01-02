@@ -8,7 +8,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true) // Habilitar @PreAuthorize
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityFilterConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -23,13 +23,14 @@ public class SecurityFilterConfig {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/auth/register",  // Permitir acceso al registro
-                                "/auth/login",     // Permitir acceso al login
-                                "/v3/api-docs/**", // Permitir acceso a la documentación de Swagger
-                                "/swagger-ui/**",  // Permitir acceso a los recursos de Swagger UI
-                                "/swagger-ui.html" // Permitir acceso a la página principal de Swagger
+                                "/auth/register",
+                                "/auth/login",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
                         ).permitAll()
-                        .anyRequest().authenticated() // Requiere autenticación para cualquier otro endpoint
+                        .anyRequest().authenticated()
+
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

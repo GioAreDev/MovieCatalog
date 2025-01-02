@@ -1,14 +1,14 @@
 services:
   mysql:
-    image: movies-db:latest  # Imagen de la base de datos con los datos preconfigurados
-    container_name: movies-db   # Nombre del contenedor para MySQL
+    image: movies-db:latest
+    container_name: movies-db
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: Movies
     ports:
-      - "3307:3306"  # Expone el puerto 3306
+      - "3307:3306"
     volumes:
-      - mysql_data:/var/lib/mysql  # Persistencia de datos
+      - mysql_data:/var/lib/mysql
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
@@ -17,15 +17,15 @@ services:
 
   app:
     build:
-      context: .  # Construye la imagen desde el Dockerfile de Spring Boot
+      context: .
       dockerfile: Dockerfile
-    image: movie-catalog-app  # Imagen de la aplicación Spring Boot
-    container_name: movie-catalog-app  # Nombre del contenedor de la aplicación
+    image: movie-catalog-app
+    container_name: movie-catalog-app
     depends_on:
       mysql:
-        condition: service_healthy  # La aplicación depende de la base de datos MySQL
+        condition: service_healthy
     ports:
-      - "8080:8080"  # Expone el puerto 8080 para el servidor HTTP
+      - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/Movies?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
@@ -33,4 +33,4 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
 
 volumes:
-  mysql_data:  # Volumen para persistir los datos de MySQL
+  mysql_data:

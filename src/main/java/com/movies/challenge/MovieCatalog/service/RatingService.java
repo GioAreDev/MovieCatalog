@@ -1,22 +1,22 @@
 package com.movies.challenge.MovieCatalog.service;
 
+import com.movies.challenge.MovieCatalog.exceptions.BadRequestException;
 import com.movies.challenge.MovieCatalog.model.Movie;
 import com.movies.challenge.MovieCatalog.model.Rating;
 import com.movies.challenge.MovieCatalog.model.User;
 import com.movies.challenge.MovieCatalog.repository.IMovieRepository;
 import com.movies.challenge.MovieCatalog.repository.IRatingRepository;
 import com.movies.challenge.MovieCatalog.repository.UserRepository;
+import com.movies.challenge.MovieCatalog.service.interfaces.IRatingService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class RatingService {
+public class RatingService implements IRatingService<Rating,Integer> {
 
     @Autowired
     private IRatingRepository ratingRepository;
@@ -26,50 +26,60 @@ public class RatingService {
 
     @Autowired
     private IMovieRepository movieRepository;
+    @Override
     public void rateMovie(Integer movieId, Integer userId, Byte ratingValue) {
+        try{
         Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new IllegalArgumentException("Movie not found"));
+                .orElseThrow(() -> new BadRequestException("Movie not found"));
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new BadRequestException("User not found"));
 
         if (ratingRepository.existsByMovieAndUser(movie, user)) {
-            throw new IllegalArgumentException("You have already rated this movie");
+            throw new BadRequestException("You have already rated this movie");
         }
 
-        Rating rating = new Rating();
-        rating.setMovie(movie);
-        rating.setUser(user);
-        rating.setRating(ratingValue);
-        rating.setCreatedDate(LocalDateTime.now());
+        if(ratingValue == null || ratingValue <= 0){
+            throw new BadRequestException("Rating value is required");
+        }
 
-        ratingRepository.save(rating);
+            Rating rating = new Rating();
+            rating.setMovie(movie);
+            rating.setUser(user);
+            rating.setRating(ratingValue);
+            rating.setCreatedDate(LocalDateTime.now());
+
+            ratingRepository.save(rating);
+        }catch(BadRequestException ex){
+            throw new BadRequestException("Something went wrong saving rates:"+ex.getMessage());
+        }
     }
 
 
-    /**
-     * Elimina la calificación de una película por parte del usuario autenticado.
-     */
+    @Override
     public void removeRating(Integer movieId, Integer userId) {
-        Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new IllegalArgumentException("Movie not found"));
+        try{
+            Movie movie = movieRepository.findById(movieId)
+                    .orElseThrow(() -> new BadRequestException("Movie not found"));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new BadRequestException("User not found"));
 
-        Rating rating = ratingRepository.findByMovieAndUser(movie, user)
-                .orElseThrow(() -> new IllegalArgumentException("Rating not found for this movie"));
+            Rating rating = ratingRepository.findByMovieAndUser(movie, user)
+                    .orElseThrow(() -> new BadRequestException("Rating not found for this movie"));
 
-        ratingRepository.delete(rating);
+            ratingRepository.delete(rating);
+        }catch (BadRequestException ex){
+            throw new BadRequestException("Something went wrong removing rating:"+ex.getMessage());
+        }
     }
 
-    /**
-     * Devuelve todas las calificaciones hechas por un usuario.
-     */
+
+    @Cacheable("rating")
+    @Override
     public List<Rating> getUserRatings(Integer userId) {
         userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
+                .orElseThrow(() -> new BadRequestException("User not found"));
         return ratingRepository.findAllByUserId(userId);
     }
 }

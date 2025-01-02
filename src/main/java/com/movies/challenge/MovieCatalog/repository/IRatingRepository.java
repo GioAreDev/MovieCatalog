@@ -14,13 +14,10 @@ import java.util.Optional;
 @Repository
 public interface IRatingRepository extends JpaRepository<Rating,Integer> {
 
-    // Verificar si un usuario ya calificó una película
     boolean existsByMovieAndUser(Movie movie, User user);
 
-    // Buscar una calificación específica por usuario y película
     Optional<Rating> findByMovieAndUser(Movie movie, User user);
 
-    // Obtener todas las calificaciones de un usuario
     @Query("SELECT r FROM Rating r WHERE r.user.userId = :userId")
     List<Rating> findAllByUserId(@Param("userId") Integer userId);
 }

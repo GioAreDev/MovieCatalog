@@ -3,6 +3,7 @@ import com.movies.challenge.MovieCatalog.dto.AuthRequest;
 import com.movies.challenge.MovieCatalog.dto.AuthResponse;
 import com.movies.challenge.MovieCatalog.dto.UserRegisterRequest;
 import com.movies.challenge.MovieCatalog.dto.UserResponse;
+import com.movies.challenge.MovieCatalog.exceptions.BadRequestException;
 import com.movies.challenge.MovieCatalog.model.User;
 import com.movies.challenge.MovieCatalog.security.JwtUtil;
 import com.movies.challenge.MovieCatalog.service.UserService;
@@ -33,56 +34,64 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // Endpoint para autenticar usuarios y generar token JWT
+
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody AuthRequest request) {
-        // Buscar usuario por email
-        Optional<User> userOptional = userService.findByEmail(request.getEmail());
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        try{
+
+            Optional<User> userOptional = userService.findByEmail(request.getEmail());
+            if (userOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+            }
+
+            User user = userOptional.get();
+
+
+            if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+            }
+
+
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            );
+
+
+            String token = jwtUtil.generateToken(user);
+
+
+            return ResponseEntity.ok(new AuthResponse(token));
+        }catch (BadRequestException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
-
-        User user = userOptional.get();
-
-        // Verificar la contraseña
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-        }
-
-        // Autenticar al usuario
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
-
-        // Generar token JWT
-        String token = jwtUtil.generateToken(user);
-
-        // Responder con el token
-        return ResponseEntity.ok(new AuthResponse(token));
     }
 
-    // Endpoint para registrar nuevos usuarios
+
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserRegisterRequest request) {
-        // Verificar si ya existe un usuario con el mismo email
-        if (userService.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email already in use");
+        try {
+
+            if (userService.findByEmail(request.getEmail()).isPresent()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email already in use");
+            }
+
+
+            User user = new User();
+            user.setUsername(request.getUsername());
+            user.setEmail(request.getEmail());
+            user.setPasswordHash(request.getPassword());
+            user.setRole("ADMIN".equals(request.getRole()) ? User.Role.ADMIN : User.Role.USER);
+            User registeredUser = userService.register(user);
+
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(new UserResponse(
+                    registeredUser.getUserId(),
+                    registeredUser.getUsername(),
+                    registeredUser.getEmail(),
+                    registeredUser.getRole().name()
+            ));
+        }catch(BadRequestException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
-
-        // Crear y registrar el usuario
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPasswordHash(request.getPassword());
-        user.setRole("ADMIN".equals(request.getRole())? User.Role.ADMIN:User.Role.USER);
-        User registeredUser = userService.register(user);
-
-        // Responder con la información del usuario registrado
-        return ResponseEntity.status(HttpStatus.CREATED).body(new UserResponse(
-                registeredUser.getUserId(),
-                registeredUser.getUsername(),
-                registeredUser.getEmail(),
-                registeredUser.getRole().name()
-        ));
     }
 }
