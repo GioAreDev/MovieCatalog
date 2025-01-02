@@ -1,5 +1,4 @@
 package com.movies.challenge.MovieCatalog.service.interfaces;
-import com.movies.challenge.MovieCatalog.model.User;
 
 import java.util.Optional;
 

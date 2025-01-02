@@ -12,26 +12,26 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-    
-    @Value("${jwt.secret}")
-    private  String secret_key;
 
+    @Value("${jwt.secret}")
+    private String secret_key;
 
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
 
+    public String extractRole(String token) {
+        return extractAllClaims(token).get("role", String.class);
+    }
 
     public boolean validateToken(String token, org.springframework.security.core.userdetails.UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-
     public boolean isTokenExpired(String token) {
-        return extractAllClaims(token).getExpiration().before(new java.util.Date());
+        return extractAllClaims(token).getExpiration().before(new Date());
     }
-
 
     public Claims extractAllClaims(String token) {
         try {
@@ -46,18 +46,13 @@ public class JwtUtil {
         }
     }
 
-
-
     public String generateToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getEmail())
-                .claim("role", user.getRole().name())
+                .claim("role", user.getRole())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
                 .signWith(SignatureAlgorithm.HS512, secret_key)
                 .compact();
     }
 }
-
-
-

@@ -1,7 +1,8 @@
 package com.movies.challenge.MovieCatalog.model;
 
-import jakarta.persistence.*;
 
+
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity

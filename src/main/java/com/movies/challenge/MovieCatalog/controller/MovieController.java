@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.time.Year;
 import com.movies.challenge.MovieCatalog.exceptions.BadRequestException;
+
 @RestController
 @RequestMapping("/movies")
 public class MovieController {
@@ -69,4 +70,3 @@ public class MovieController {
         }
     }
 }
-

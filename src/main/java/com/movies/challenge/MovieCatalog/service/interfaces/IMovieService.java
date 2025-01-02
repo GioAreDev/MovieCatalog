@@ -3,7 +3,7 @@ package com.movies.challenge.MovieCatalog.service.interfaces;
 import org.springframework.data.domain.Page;
 
 import java.time.Year;
-import java.util.List;
+
 
 public interface IMovieService <T,ID>{
     void add(T entity);

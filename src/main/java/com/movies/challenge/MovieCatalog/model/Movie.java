@@ -1,7 +1,8 @@
 package com.movies.challenge.MovieCatalog.model;
 
-import jakarta.persistence.*;
 
+
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.Year;
 
@@ -16,7 +17,7 @@ public class Movie {
     private String name;
 
     @Column(name = "release_year")
-    private Year releaseYear;
+    private Integer releaseYear;
 
     private String synopsis;
 
@@ -38,7 +39,7 @@ public class Movie {
     }
 
     public Movie() {
-        
+
     }
 
     public Integer getMovieId() {
@@ -57,11 +58,11 @@ public class Movie {
         this.name = name;
     }
 
-    public Year getReleaseYear() {
+    public Integer getReleaseYear() {
         return releaseYear;
     }
 
-    public void setReleaseYear(Year releaseYear) {
+    public void setReleaseYear(Integer releaseYear) {
         this.releaseYear = releaseYear;
     }
 

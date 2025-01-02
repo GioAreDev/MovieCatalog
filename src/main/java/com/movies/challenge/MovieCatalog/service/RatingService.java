@@ -9,6 +9,7 @@ import com.movies.challenge.MovieCatalog.repository.IRatingRepository;
 import com.movies.challenge.MovieCatalog.repository.UserRepository;
 import com.movies.challenge.MovieCatalog.service.interfaces.IRatingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ public class RatingService implements IRatingService<Rating,Integer> {
     @Autowired
     private IMovieRepository movieRepository;
     @Override
+    @CacheEvict(value = "ratings", key = "#userId")
     public void rateMovie(Integer movieId, Integer userId, Byte ratingValue) {
         try{
         Movie movie = movieRepository.findById(movieId)
@@ -57,6 +59,7 @@ public class RatingService implements IRatingService<Rating,Integer> {
 
 
     @Override
+    @CacheEvict(value = "ratings", key = "#userId")
     public void removeRating(Integer movieId, Integer userId) {
         try{
             Movie movie = movieRepository.findById(movieId)
@@ -75,7 +78,7 @@ public class RatingService implements IRatingService<Rating,Integer> {
     }
 
 
-    @Cacheable("rating")
+    @Cacheable(value = "ratings", key = "#userId")
     @Override
     public List<Rating> getUserRatings(Integer userId) {
         userRepository.findById(userId)

@@ -1,65 +1,67 @@
 package com.movies.challenge.MovieCatalog.security;
 
-import com.movies.challenge.MovieCatalog.service.CustomUserDetailsService;
-import io.jsonwebtoken.Claims;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
+import java.util.Collections;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private final CustomUserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
 
-    @Autowired
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, CustomUserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
     }
 
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        try {
+            SecurityContextHolder.clearContext();
 
-        String authHeader = request.getHeader("Authorization");
-        String jwtToken = null;
-        String username = null;
+            final String authorizationHeader = request.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            jwtToken = authHeader.substring(7);
-            username = jwtUtil.extractUsername(jwtToken);
-        }
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                String token = authorizationHeader.substring(7);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            var userDetails = userDetailsService.loadUserByUsername(username);
+                String username = jwtUtil.extractUsername(token);
+                String role = jwtUtil.extractRole(token);
+                System.out.println("Token Values: ");
+                System.out.println("Username: " + username);
+                System.out.println("Role: " + role);
 
-            if (jwtUtil.validateToken(jwtToken, userDetails)) {
-                Claims claims = jwtUtil.extractAllClaims(jwtToken);
-                String role = claims.get("role", String.class);
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
-                var authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, authorities);
+                    if (jwtUtil.validateToken(token, userDetails)) {
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                userDetails, null,
+                                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
+                        );
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    }
+                }
             }
+        } catch (Exception ex) {
+            System.out.println("Error in JwtAuthenticationFilter: " + ex.getMessage());
+            ex.printStackTrace();
         }
-
-        filterChain.doFilter(request, response);
+        chain.doFilter(request, response);
     }
 
-
 }
-

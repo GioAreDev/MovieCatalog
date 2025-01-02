@@ -1,7 +1,7 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.4.1'
-	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.springframework.boot' version '2.7.13' // Actualizado a la versión 2.7.X
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE' // Compatible con Spring Boot 2.7.X
 }
 
 group = 'com.movies.challenge'
@@ -9,7 +9,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
+		languageVersion = JavaLanguageVersion.of(11) // Java 11 especificado
 	}
 }
 
@@ -24,7 +24,7 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+	implementation 'org.springdoc:springdoc-openapi-ui:1.6.15' // Compatible con Spring Boot 2.7.X
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.6'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

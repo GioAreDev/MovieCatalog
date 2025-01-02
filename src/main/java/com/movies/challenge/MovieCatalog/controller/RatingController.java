@@ -51,6 +51,7 @@ public class RatingController {
        }
     }
 
+
     @GetMapping
     public ResponseEntity<List<Rating>> getUserRatings(Authentication authentication) {
         Integer userId = getUserIdFromAuthentication(authentication);
@@ -62,7 +63,6 @@ public class RatingController {
     private Integer getUserIdFromAuthentication(Authentication authentication) {
         String username = authentication.getName();
         System.out.println("Username extracted from token: " + username);
-
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
